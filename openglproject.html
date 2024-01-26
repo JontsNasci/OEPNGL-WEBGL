@@ -1,0 +1,153 @@
+<html>
+
+<body>
+    <canvas id="glCanvas">
+
+    </canvas>
+    <script type="text/javascript" charset="utf-8">
+        renderer();
+        function qik(fs, GL)
+        {
+            /** VERY SIMPLE LOGGER EERO NOT MUCH **/
+            if (false)
+            console.log(fs, GL.getError());
+        }
+        function renderer() {
+            
+            const canvas = document.querySelector("#glCanvas");
+            // Inicializa o contexto GL
+            const gl = canvas.getContext("webgl");
+
+            // Só continua se o WebGL estiver disponível e funcionando
+            if (!gl) {
+                alert(
+                    "Incapaz de inicializar o WebGL.Seu navegador ou sua máquina não suporta."
+                );
+                return;
+            }
+
+            // Define a cor para preto totalmente opaca (sem transparência)
+            gl.clearColor(0.0144774, 0.29484844374, 0.448484, 1.0);
+            const buffer = gl.createBuffer();
+            var FSIZE = 4;
+            console.log("war", FSIZE);
+            //exit(1);
+            //const framBuffer = gl.createFrameBuffer();
+            const shaders = gl.createProgram();
+            //print("works?");
+            //const sourceFrag = rf("/storage/emulated/0/assembly/FRAG.txt");
+            //const sourceVert = rf("/storage/emulated/0/assembly/VERT.txt");
+            const sourceFrag = `#version 100
+            
+            precision highp float;
+            
+            uniform float time;
+            //in vec4 pcol;
+            //out vec4 o;
+
+            void main()
+            {
+                vec4 g = vec4(1.0, 1.0, 0.7473, 1.0000);
+                gl_FragColor = g;
+            }
+            `;
+            
+            const sourceVert = `#version 100
+
+            precision highp float;
+            attribute vec3 pos;
+            //in vec4 col;
+
+            //out vec4 pcol;
+            
+            uniform float time;
+
+            void main()
+    {
+                //pcol = col;
+                gl_Position = vec4(pos, 1.0);
+                //gl_PointSize = 5;
+            }
+            `;
+            
+            const a = gl.getParameter(gl.VERSION);
+            const b = gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
+            console.log("j", a);
+            "WebGL 1.0 (OpenGL ES 2.0 Chromium)"
+            console.log("is in?", sourceFrag, sourceVert);
+            const frag = gl.createShader(gl.FRAGMENT_SHADER);
+            const vert = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(frag, sourceFrag);
+            gl.shaderSource(vert, sourceVert);
+            gl.compileShader(frag);
+            gl.compileShader(vert);
+            gl.attachShader(shaders, frag);
+            gl.attachShader(shaders, vert);
+            gl.linkProgram(shaders);
+            gl.useProgram(shaders);
+            qik("AFTER SHADER", gl);
+
+            const vertices = new Float32Array([
+                0.0, 0.5, 0.0,
+                0.5, -0.5, 0.0,
+                -0.5, -0.5, 0.0
+            ]);
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            //gl.gwtAttributeLocation(gl.program,'aPosition');
+            qik("AFTER BIND", gl);
+            console.log("&", gl.getShaderInfoLog(frag));
+            console.log("&", gl.getShaderInfoLog(vert));
+            console.log("&!", gl.getProgramInfoLog(shaders));
+
+            var apos = gl.getAttribLocation(shaders, 'pos');
+            //var acol = gl.getAttribLocation(shaders, 'acol');
+            //var bcol = gl.getAttribLocation(shaders, 'jsdd');
+            
+            //console.log("LOGGER", apos, acol);
+            qik("AFTER ATTRIBUTES ", gl);
+            console.log("EA3", gl.getError());
+            //gl.
+            gl.vertexAttribPointer(apos, 3, gl.FLOAT, false, FSIZE*3, 0);
+            gl.enableVertexAttribArray(apos);
+            /**console.log("EA2", gl.getError());
+            gl.enableVertexAttribArray(acol);
+            console.log("A7", gl.getError())
+            gl.vertexAttribPointer(acol, 4, gl.FLOAT, false, FSIZE*7, FSIZE*4);
+**/
+            console.log("EA1", gl.getError());
+            qik("ATTRIBUTE", gl);
+            gl.clearColor(Math.floor(Math.random()*100)/600, Math.floor(Math.random()*100)/600, (Math.floor(Math.random()*100))/600, 1);
+            
+            if (!gl.getProgramParameter(shaders, gl.LINK_STATUS)) {
+                const linkErrLog = gl.getProgramInfoLog(shaders);
+                console.log(linkErrLog);
+            }
+            console.log("BEFORE SOME", gl.getError());
+            let v = gl.createBuffer();
+            //gl.bindBuffer(gl.ARRAY_BUFFER, , );
+            console.log("AFTER SOME" ,gl.getError());
+            gl.viewport(0, 0, canvas.width, canvas.heigth);
+            var counter = 0;
+            gl.enableVertexAttribArray(apos);
+            console.log("ENABLE", gl.getError());
+            const d = new Date("July 21, 1983 01:15:00.250");
+            let ms = d.getMilliseconds();
+            var i = setInterval(function() {
+                var id = gl.getUniformLocation(shaders, "time");
+                gl.uniform1f(id, d.getMilliseconds());
+                gl.drawArrays(gl.TRIANGLES, 0, 9);
+                console.log(gl.getError());
+                qik("DRAW", gl);
+                //gl.clear(gl.COLOR_BUFFER_BIT);
+                qik("CLEAR", gl);
+                counter++;
+
+            }, .0000001);
+
+            //gl.deleteProgram(shaders);
+        }
+
+    </script>
+</body>
+</html>
